@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>버스 정류장 좌표 가져오기</title>
+    <title>버스 정류장 좌표 지도</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,14 +18,18 @@
             margin-top: 20px;
             color: red;
         }
-        .disabled-input {
-            background-color: #f0f0f0;
-            cursor: not-allowed;
+        #map {
+            height: 500px;
+            margin-top: 20px;
+        }
+        #downloadCsv {
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>버스 정류장 좌표 가져오기</h1>
+    <h1>버스 정류장 좌표 지도</h1>
     
     <label for="kmbInput">KMB 버스 노선 (쉼표로 구분, 예: 91M, 91P):</label><br>
     <input type="text" id="kmbInput" placeholder="예: 91M, 91P" style="width: 300px;"><br>
@@ -31,17 +37,22 @@
     <label for="ctbInput">CTB 버스 노선 (쉼표로 구분, 예: 792M):</label><br>
     <input type="text" id="ctbInput" placeholder="예: 792M" style="width: 300px;"><br>
     
-    <label for="gmbNtInput">GMB(NT) 버스 노선 (쉼표로 구분, 예: 11, 11M):</label><br>
-    <input type="text" id="gmbNtInput" placeholder="예: 11, 11M" style="width: 300px;"><br>
-    
-    <label for="gmbHkiInput">GMB(HKI) 버스 노선 (개발 중, 입력 불가):</label><br>
-    <input type="text" id="gmbHkiInput" placeholder="개발 중" style="width: 300px;" class="disabled-input" disabled><br>
-    
-    <label for="gmbKlnInput">GMB(KLN) 버스 노선 (개발 중, 입력 불가):</label><br>
-    <input type="text" id="gmbKlnInput" placeholder="개발 중" style="width: 300px;" class="disabled-input" disabled><br>
+    <label for="gmbNtInput">GMB(NT) 버스 노선 (쉼표로 구분, 예: 1, 11M):</label><br>
+    <input type="text" id="gmbNtInput" placeholder="예: 1, 11M" style="width: 300px;"><br>
     
     <button onclick="fetchBusStops()">정류장 정보 가져오기</button>
     <div id="result"></div>
+    
+    <div id="map"></div>
+    <button id="downloadCsv" onclick="downloadCSV()">CSV 다운로드</button>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    
+    <!-- JSON 데이터 직접 삽입 -->
+    <script src="bus_stop_data.js"></script>
+    
+    <!-- 메인 스크립트 -->
     <script src="script.js"></script>
 </body>
 </html>
