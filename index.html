@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버스 정류장 좌표 가져오기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, button {
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            color: red;
+        }
+        .disabled-input {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>버스 정류장 좌표 가져오기</h1>
+    
+    <label for="kmbInput">KMB 버스 노선 (쉼표로 구분, 예: 91M, 91P):</label><br>
+    <input type="text" id="kmbInput" placeholder="예: 91M, 91P" style="width: 300px;"><br>
+    
+    <label for="ctbInput">CTB 버스 노선 (쉼표로 구분, 예: 792M):</label><br>
+    <input type="text" id="ctbInput" placeholder="예: 792M" style="width: 300px;"><br>
+    
+    <label for="gmbNtInput">GMB(NT) 버스 노선 (쉼표로 구분, 예: 11, 11M):</label><br>
+    <input type="text" id="gmbNtInput" placeholder="예: 11, 11M" style="width: 300px;"><br>
+    
+    <label for="gmbHkiInput">GMB(HKI) 버스 노선 (개발 중, 입력 불가):</label><br>
+    <input type="text" id="gmbHkiInput" placeholder="개발 중" style="width: 300px;" class="disabled-input" disabled><br>
+    
+    <label for="gmbKlnInput">GMB(KLN) 버스 노선 (개발 중, 입력 불가):</label><br>
+    <input type="text" id="gmbKlnInput" placeholder="개발 중" style="width: 300px;" class="disabled-input" disabled><br>
+    
+    <button onclick="fetchBusStops()">정류장 정보 가져오기</button>
+    <div id="result"></div>
+    <script src="script.js"></script>
+</body>
+</html>
