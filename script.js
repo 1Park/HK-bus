@@ -69,7 +69,7 @@ async function fetchBusStops() {
     stopData = [];
     const notExist = [];
 
-    document.getElementById('result').innerText = '데이터를 가져오는 중...';
+    document.getElementById('result').innerText = 'Gathering Data...';
     clearMarkers();
 
     // KMB 처리 (API)
@@ -200,7 +200,7 @@ async function fetchBusStops() {
 
     // 결과 출력
     if (notExist.length > 0) {
-        document.getElementById('result').innerText = `존재하지 않는 노선: ${notExist.join(', ')}`;
+        document.getElementById('result').innerText = `Routes not exist: ${notExist.join(', ')}`;
     } else {
         document.getElementById('result').innerText = '';
     }
@@ -229,7 +229,7 @@ async function fetchBusStops() {
 // CSV 다운로드 함수
 function downloadCSV() {
     if (stopData.length === 0) {
-        alert('다운로드할 데이터가 없습니다.');
+        alert('There is no existing data to download.');
         return;
     }
 
