@@ -2,6 +2,7 @@
 let map;
 let markers = [];
 let stopData = [];
+let kmbRoutes=null, ctbRoutes=null;
 
 // 지도 초기화
 function initMap() {
@@ -13,6 +14,30 @@ function initMap() {
     }
 }
 
+async function loadKmb() {
+
+    try {
+        const kmbResponse = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/route');
+        const kmbData = await kmbResponse.json();
+        kmbRoutes = kmbData.data.map(route => route.route);
+        console.log('KMB 루트 로드 완료:');
+    } catch (error) {
+        console.error('KMB 루트 로드 실패:', error);
+    }
+}
+
+async function loadCtb(){
+
+    try {
+        const ctbResponse = await fetch('https://rt.data.gov.hk/v2/transport/citybus/route/CTB');
+        const ctbData = await ctbResponse.json();
+        ctbRoutes = ctbData.data.map(route => route.route);
+        console.log('CTB 루트 로드 완료');
+    } catch (error) {
+        console.error('CTB 루트 로드 실패:', error);
+    }
+}
+
 // 기존 마커 제거
 function clearMarkers() {
     markers.forEach(marker => map.removeLayer(marker));
@@ -20,8 +45,10 @@ function clearMarkers() {
 }
 
 // 페이지 로드 시 지도 초기화
-window.onload = () => {
+window.onload = async () => {
     initMap();
+    loadKmb();
+    loadCtb();
 };
 
 async function fetchBusStops() {
@@ -29,11 +56,16 @@ async function fetchBusStops() {
     const kmbInput = document.getElementById('kmbInput').value;
     const ctbInput = document.getElementById('ctbInput').value;
     const gmbNtInput = document.getElementById('gmbNtInput').value;
+    const gmbHkiInput = document.getElementById('gmbHkiInput').value;
+    const gmbKlnInput = document.getElementById('gmbKlnInput').value;
     
     const kmbBuses = kmbInput ? kmbInput.split(',').map(bus => bus.trim()) : [];
     const ctbBuses = ctbInput ? ctbInput.split(',').map(bus => bus.trim()) : [];
     const gmbNtBuses = gmbNtInput ? gmbNtInput.split(',').map(bus => bus.trim()) : [];
-    
+    const gmbHkiBuses = gmbHkiInput ? gmbHkiInput.split(',').map(bus => bus.trim()) : [];
+    const gmbKlnBuses = gmbKlnInput ? gmbKlnInput.split(',').map(bus => bus.trim()) : [];
+
+
     stopData = [];
     const notExist = [];
 
@@ -42,60 +74,68 @@ async function fetchBusStops() {
 
     // KMB 처리 (API)
     if (kmbBuses.length > 0) {
-        const kmbResponse = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/route');
-        const kmbRoutes = (await kmbResponse.json()).data.map(route => route.route);
         
-        for (const bus of kmbBuses) {
-            if (kmbRoutes.includes(bus)) {
-                try {
-                    const routeResponse = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${bus}/outbound/1`);
-                    const routeData = await routeResponse.json();
-                    for (const stop of routeData.data) {
-                        const stopResponse = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${stop.stop}`);
-                        const stopInfo = await stopResponse.json();
-                        stopData.push({
-                            Name: stopInfo.data.name_en,
-                            Lat: parseFloat(stopInfo.data.lat),
-                            Long: parseFloat(stopInfo.data.long),
-                            Bus: bus,
-                            Category: 'KMB'
-                        });
+        if(!kmbRoutes){
+            await loadKmb();
+        }
+        if(kmbRoutes){
+            for (const bus of kmbBuses) {
+                if (kmbRoutes.includes(bus)) {
+                    try {
+                        const routeResponse = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${bus}/outbound/1`);
+                        const routeData = await routeResponse.json();
+                        for (const stop of routeData.data) {
+                            const stopResponse = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${stop.stop}`);
+                            const stopInfo = await stopResponse.json();
+                            stopData.push({
+                                Name: stopInfo.data.name_en,
+                                Lat: parseFloat(stopInfo.data.lat),
+                                Long: parseFloat(stopInfo.data.long),
+                                Bus: bus,
+                                Category: 'KMB'
+                            });
+                        }
+                    } catch (error) {
+                        notExist.push(`KMB-${bus}`);
                     }
-                } catch (error) {
+                } else {
                     notExist.push(`KMB-${bus}`);
                 }
-            } else {
-                notExist.push(`KMB-${bus}`);
             }
         }
+        
     }
 
-    // CTB 처리 (API) - 엔드포인트를 /v2/로 수정
+    // CTB 처리 (API) 
     if (ctbBuses.length > 0) {
-        const ctbResponse = await fetch('https://rt.data.gov.hk/v2/transport/citybus/route/CTB');
-        const ctbRoutes = (await ctbResponse.json()).data.map(route => route.route);
-        
-        for (const bus of ctbBuses) {
-            if (ctbRoutes.includes(bus)) {
-                try {
-                    const routeResponse = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/route-stop/CTB/${bus}/outbound`);
-                    const routeData = await routeResponse.json();
-                    for (const stop of routeData.data) {
-                        const stopResponse = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/stop/${stop.stop}`); // /v2/ 사용
-                        const stopInfo = await stopResponse.json();
-                        stopData.push({
-                            Name: stopInfo.data.name_en,
-                            Lat: parseFloat(stopInfo.data.lat),
-                            Long: parseFloat(stopInfo.data.long),
-                            Bus: bus,
-                            Category: 'CTB'
-                        });
+        if(!ctbRoutes){
+            await loadCtb();
+        }
+        if(ctbRoutes){
+            for (const bus of ctbBuses) {
+                if (ctbRoutes.includes(bus)) {
+                    try {
+                        const routeResponse = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/route-stop/CTB/${bus}/outbound`);
+    
+                        const routeData = await routeResponse.json();
+                        for (const stop of routeData.data) {
+                            const stopResponse = await fetch(`https://rt.data.gov.hk/v2/transport/citybus/stop/${stop.stop}`); // /v2/ 사용
+    
+                            const stopInfo = await stopResponse.json();
+                            stopData.push({
+                                Name: stopInfo.data.name_en,
+                                Lat: parseFloat(stopInfo.data.lat),
+                                Long: parseFloat(stopInfo.data.long),
+                                Bus: bus,
+                                Category: 'CTB'
+                            });
+                        }
+                    } catch (error) {
+                        notExist.push(`CTB-${bus}`);
                     }
-                } catch (error) {
+                } else {
                     notExist.push(`CTB-${bus}`);
                 }
-            } else {
-                notExist.push(`CTB-${bus}`);
             }
         }
     }
@@ -120,6 +160,44 @@ async function fetchBusStops() {
         }
     }
 
+    if (gmbHkiBuses.length > 0) {
+        for (const bus of gmbHkiBuses) {
+            if (busStopData.GMB_HKI[bus]) {
+                const stops = busStopData.GMB_HKI[bus];
+                stops.forEach(stop => {
+                    stopData.push({
+                        Name: stop.name_en,
+                        Lat: parseFloat(stop.lat),
+                        Long: parseFloat(stop.long),
+                        Bus: bus,
+                        Category: 'GMB(HKI)'
+                    });
+                });
+            } else {
+                notExist.push(`GMB(HKI)-${bus}`);
+            }
+        }
+    }
+
+    if (gmbKlnBuses.length > 0) {
+        for (const bus of gmbKlnBuses) {
+            if (busStopData.GMB_KLN[bus]) {
+                const stops = busStopData.GMB_KLN[bus];
+                stops.forEach(stop => {
+                    stopData.push({
+                        Name: stop.name_en,
+                        Lat: parseFloat(stop.lat),
+                        Long: parseFloat(stop.long),
+                        Bus: bus,
+                        Category: 'GMB(KLN)'
+                    });
+                });
+            } else {
+                notExist.push(`GMB(KLN)-${bus}`);
+            }
+        }
+    }
+
     // 결과 출력
     if (notExist.length > 0) {
         document.getElementById('result').innerText = `존재하지 않는 노선: ${notExist.join(', ')}`;
@@ -139,6 +217,10 @@ async function fetchBusStops() {
         map.fitBounds(group.getBounds());
 
         document.getElementById('downloadCsv').style.display = 'block';
+
+        //지도 위치로 자동 스크롤
+        const mapElement = document.getElementById('map');
+        mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
         document.getElementById('downloadCsv').style.display = 'none';
     }
@@ -162,3 +244,4 @@ function downloadCSV() {
     link.click();
     document.body.removeChild(link);
 }
+

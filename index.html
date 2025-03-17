@@ -3,48 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>버스 정류장 좌표 지도</title>
+    <title>Hong Kong Bus Stop Locator</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 15px;
         }
-        label, input, button {
-            margin: 10px 0;
+    
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 2rem;
         }
+    
+        label {
+            display: block;
+            margin: 0px 0 0px;
+            font-size: 1.05rem;
+        }
+    
+        input {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+    
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+
+        }
+    
+        button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    
+        button:hover {
+            background-color: #35a049;
+        }
+    
         #result {
             margin-top: 20px;
+            font-size: 1.2rem;
             color: red;
+            text-align: center;
         }
+    
         #map {
             height: 500px;
-            margin-top: 20px;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 800px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
         }
+    
         #downloadCsv {
-            margin-top: 10px;
-            display: none;
+            margin: 10px 0;
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            text-align: center;
+
         }
     </style>
 </head>
 <body>
-    <h1>버스 정류장 좌표 지도</h1>
+    <h1>Hong Kong Bus Stop Locator</h1>
     
-    <label for="kmbInput">KMB 버스 노선 (쉼표로 구분, 예: 91M, 91P):</label><br>
-    <input type="text" id="kmbInput" placeholder="예: 91M, 91P" style="width: 300px;"><br>
+    <label for="kmbInput">KMB Bus Routes (separated by commas, e.g., 91M, 91P):</label><br>
+    <input type="text" id="kmbInput" placeholder="91M, 91P" style="width: 300px;"><br>
     
-    <label for="ctbInput">CTB 버스 노선 (쉼표로 구분, 예: 792M):</label><br>
-    <input type="text" id="ctbInput" placeholder="예: 792M" style="width: 300px;"><br>
+    <label for="ctbInput">CityBus Routes (separated by commas, e.g., 792M):</label><br>
+    <input type="text" id="ctbInput" placeholder="792M" style="width: 300px;"><br>
     
-    <label for="gmbNtInput">GMB(NT) 버스 노선 (쉼표로 구분, 예: 1, 11M):</label><br>
-    <input type="text" id="gmbNtInput" placeholder="예: 1, 11M" style="width: 300px;"><br>
+    <label for="gmbNtInput">Green Minibus Routes - New Territories (separated by commas, e.g., 1, 11M, 11B):</label><br>
+    <input type="text" id="gmbNtInput" placeholder="1, 11M, 11B" style="width: 300px;"><br>
+
+    <label for="gmbHkiInput">Green Minibus Routes - Hong Kong Island (separated by commas, e.g., 1, 10):</label><br>
+    <input type="text" id="gmbHkiInput" placeholder="1, 10" style="width: 300px;"><br>
+
+    <label for="gmbKlnInput">Green Minibus Routes - Kowloon (separated by commas, e.g., 12, 12A):</label><br>
+    <input type="text" id="gmbKlnInput" placeholder="12, 12A" style="width: 300px;"><br>
     
-    <button onclick="fetchBusStops()">정류장 정보 가져오기</button>
+    <button onclick="fetchBusStops()">Plot Stops</button>
     <div id="result"></div>
     
     <div id="map"></div>
-    <button id="downloadCsv" onclick="downloadCSV()">CSV 다운로드</button>
+    <button id="downloadCsv" onclick="downloadCSV()">CSV Download</button>
     
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
